@@ -1,0 +1,56 @@
+
+- hosts: routers
+  become: true
+  gather_facts: no
+  tasks: 
+  
+    - name: Apply the provided configuration
+      cisco.ios.ios_hostname:
+        config:
+          hostname: Router1
+        state: merged
+
+    - name: configuring login banner
+      cisco.ios.ios_banner:
+        banner: motd
+        text: |
+          Unauthorized Personels are Prohibited!
+        state: present
+   
+    - name: configuring domain name
+      cisco.ios.ios_system:
+        domain_name: netacad.com
+        state: present
+
+    - name: configuring line con 0
+      cisco.ios.ios_config:
+        lines:
+        - password cisco
+        - login
+        - logging synchronous 
+        parents: line console 0
+
+    - name: configuring privilege exec mode password 
+      cisco.ios.ios_config:
+        lines: enable secret class
+
+    - name: saving running config to startup config
+      cisco.ios.ios_config:
+        save_when: modified
+
+    - block:
+
+      - name: checking hostname
+        cisco.ios.ios_command:
+          commands: show run 
+        register: output_run
+
+      - debug: 
+          msg="{{ output_run }}"
+
+# configuring ip address
+- hosts: routers[0]
+  become: true
+  gather_facts: no
+  roles:
+     - role: c7200

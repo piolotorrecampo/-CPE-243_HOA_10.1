@@ -1,0 +1,31 @@
+- name: configuring ip address in serial5/0
+  cisco.ios.ios_config:
+    lines:
+    - description R1 to R2
+    - ip address 10.0.1.1 255.255.255.252
+    - no shutdown
+    - clock rate 64000
+    parents: interface Serial5/0
+
+- name: configuring ip address in serial5/1
+  cisco.ios.ios_config:
+    lines:
+    - description R1 to R3
+    - ip address 10.0.2.1 255.255.255.252
+    - no shutdown
+    - clock rate 64000
+    parents: interface Serial5/1
+
+
+- block:
+
+  - name: checking hostname
+    cisco.ios.ios_command:
+      commands: show ip interface brief 
+    register: output_int
+
+  - debug: 
+      msg="{{ output_int }}"
+
+
+
